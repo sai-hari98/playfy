@@ -11,7 +11,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
 @Component
-public class AuthDao {
+public class SpotifyAuthDao {
 
     @Autowired
     @Qualifier("spotifyRestTemplate")

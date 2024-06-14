@@ -18,13 +18,16 @@ public class UserDao {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private PasswordUtil passwordUtil;
+
     public User getUser(String userId){
         return userRepository.findById(userId).orElseThrow(() -> new BusinessException(HttpStatus.BAD_REQUEST, "Invalid User ID"));
     }
 
     public void createUser(User user) {
         try{
-            user.setPassword(PasswordUtil.hashPasswordFromBase64EncodedPassword(user.getPassword()));
+            user.setPassword(passwordUtil.hashPassword(user.getPassword()));
             userRepository.save(user);
         }catch(Exception e){
             log.error("Exception while creating user", e);

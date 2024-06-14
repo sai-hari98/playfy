@@ -15,9 +15,12 @@ public class AuthService {
     @Autowired
     private UserDao userDao;
 
+    @Autowired
+    private PasswordUtil passwordUtil;
+
     public boolean login(LoginRequest loginRequest){
         User user = userDao.getUser(loginRequest.getUserId());
-        String hashedPassword = PasswordUtil.hashPasswordFromBase64EncodedPassword(loginRequest.getPassword());
+        String hashedPassword = passwordUtil.hashPassword(loginRequest.getPassword());
         if(!user.getPassword().equals(hashedPassword)){
             throw new BusinessException(HttpStatus.UNAUTHORIZED, "Invalid Password");
         }

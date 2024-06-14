@@ -5,3 +5,6 @@ spring:
     mongodb:
       uri: mongodb://localhost:27017/
       database: playfy
+security:
+  jwt:
+    expiration-time: 1200000

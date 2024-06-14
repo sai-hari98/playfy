@@ -2,6 +2,7 @@ package com.saih.playfy.controller;
 
 import com.saih.playfy.entity.User;
 import com.saih.playfy.service.UserService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,7 +19,7 @@ public class UserController {
     private UserService userService;
 
     @PostMapping
-    public ResponseEntity<Boolean> createUser(@RequestBody User user){
+    public ResponseEntity<Boolean> createUser(@Valid @RequestBody User user){
         userService.createUser(user);
         return new ResponseEntity<>(true, HttpStatus.CREATED);
     }

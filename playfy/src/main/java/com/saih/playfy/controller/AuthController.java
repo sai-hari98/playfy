@@ -2,6 +2,7 @@ package com.saih.playfy.controller;
 
 import com.saih.playfy.dto.LoginRequest;
 import com.saih.playfy.service.AuthService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,7 +19,7 @@ public class AuthController {
     private AuthService authService;
 
     @PostMapping("/login")
-    public ResponseEntity<Boolean> login(@RequestBody LoginRequest loginRequest){
+    public ResponseEntity<Boolean> login(@Valid @RequestBody LoginRequest loginRequest){
         return new ResponseEntity<>(authService.login(loginRequest), HttpStatus.OK);
     }
 }

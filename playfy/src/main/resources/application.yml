@@ -3,8 +3,9 @@ spring:
     name: playfy
   data:
     mongodb:
-      uri: mongodb://localhost:27017/
+      uri: ${MONGO_URI}
       database: playfy
 security:
   jwt:
-    expiration-time: 1200000
+    expiration-time: ${JWT_EXPIRATION_TIME}
+    secret-key: ${JWT_SECRET_KEY}

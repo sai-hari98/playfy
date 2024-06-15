@@ -4,9 +4,9 @@ import com.saih.playfy.dao.UserDao;
 import com.saih.playfy.dto.LoginRequest;
 import com.saih.playfy.entity.User;
 import com.saih.playfy.exception.BusinessException;
-import com.saih.playfy.util.PasswordUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -16,14 +16,17 @@ public class AuthService {
     private UserDao userDao;
 
     @Autowired
-    private PasswordUtil passwordUtil;
+    private JWTService jwtService;
 
-    public boolean login(LoginRequest loginRequest){
+    @Autowired
+    private BCryptPasswordEncoder bCryptPasswordEncoder;
+
+    public String login(LoginRequest loginRequest){
         User user = userDao.getUser(loginRequest.getUserId());
-        String hashedPassword = passwordUtil.hashPassword(loginRequest.getPassword());
-        if(!user.getPassword().equals(hashedPassword)){
+        if(!bCryptPasswordEncoder.matches(loginRequest.getPassword(), user.getPassword())){
             throw new BusinessException(HttpStatus.UNAUTHORIZED, "Invalid Password");
         }
-        return true;
+
+        return jwtService.generateToken(user);
     }
 }

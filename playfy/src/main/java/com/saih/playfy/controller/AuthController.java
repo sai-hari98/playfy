@@ -19,7 +19,7 @@ public class AuthController {
     private AuthService authService;
 
     @PostMapping("/login")
-    public ResponseEntity<Boolean> login(@Valid @RequestBody LoginRequest loginRequest){
+    public ResponseEntity<String> login(@Valid @RequestBody LoginRequest loginRequest){
         return new ResponseEntity<>(authService.login(loginRequest), HttpStatus.OK);
     }
 }

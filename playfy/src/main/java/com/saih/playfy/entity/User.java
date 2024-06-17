@@ -20,6 +20,9 @@ public class User implements UserDetails {
     @NotBlank(message = "Password cannot be empty")
     private String password;
     private String spotifyId;
+    private String firstName;
+    private String lastName;
+    private String email;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

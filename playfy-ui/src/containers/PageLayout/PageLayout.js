@@ -2,6 +2,7 @@ import React, {Component} from 'react';
 import Login from "../../components/Login/Login";
 import Register from "../../components/Register/Register";
 import {Route, Routes} from "react-router-dom";
+import Dashboard from '../../components/Dashboard/Dashboard';
 
 class PageLayout extends Component {
 
@@ -11,7 +12,8 @@ class PageLayout extends Component {
                 <Routes>
                     <Route path="/login" element={<Login/>}/>
                     <Route path="/register" element={<Register/>}/>
-                    <Route component={Login}/>
+                    <Route path="/dashboard" element={<Dashboard/>}/>
+                    <Route path ="/" component={Login}/>
                 </Routes>
             </>
         )

@@ -1,8 +1,12 @@
 package com.saih.playfy.config;
 
+import com.saih.playfy.entity.User;
 import com.saih.playfy.repository.UserRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -11,9 +15,12 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
+import java.util.Optional;
+
 @Configuration
 public class AuthProviderConfiguration {
 
+    private static final Logger log = LoggerFactory.getLogger(AuthProviderConfiguration.class);
     private final UserRepository userRepository;
 
     public AuthProviderConfiguration(UserRepository userRepository){
@@ -22,7 +29,18 @@ public class AuthProviderConfiguration {
 
     @Bean
     UserDetailsService userDetailsService() {
-        return userId -> userRepository.findById(userId).orElseThrow(() -> new UsernameNotFoundException("Invalid User Id"));
+        return userId -> {
+            try{
+                Optional<User> user = userRepository.findById(userId);
+                if(user.isPresent()){
+                    return user.get();
+                }
+                throw new UsernameNotFoundException("Invalid User Id");
+            }catch(Exception exception){
+                log.error("Exception in fetching user for security", exception);
+                throw new UsernameNotFoundException("Invalid User Id");
+            }
+        };
     }
 
     @Bean

@@ -1,6 +1,8 @@
 import React, { Component } from "react";
 import playfyAxios from "../../playfy-axios";
 import Loader from "../Loader/Loader";
+import { connect } from "react-redux";
+import { Link } from "react-router-dom";
 
 class Dashboard extends Component {
 
@@ -9,7 +11,7 @@ class Dashboard extends Component {
     }
 
     getDashboardInfo() {
-        playfyAxios.get("/dashboard").then(response => {
+        playfyAxios.get("/dashboard", {headers: {Authorization: `Bearer ${this.props.token}`}}).then(response => {
             this.setState({ dashboardData: response.data });
         }).catch(error => {
             console.log(error);
@@ -27,8 +29,8 @@ class Dashboard extends Component {
                                 <div className="col-6">
                                     No accounts are linked currently. Want to link one?
                                 </div>
-                                <div className="col-6">
-                                    <a className="card-link" href="/linked-accounts">Link an account</a>
+                                <div className="col-2">
+                                    <Link className="card-link" to="/linked-accounts">Link an account</Link>
                                 </div>
                             </div>
                         </div>
@@ -65,11 +67,17 @@ class Dashboard extends Component {
             return <Loader />;
         }
         return (
-            <div className="container">
+            <div className="container-fluid mt-5 pb-5">
                 {this.state.dashboardData.linkedAccounts.length <= 0 ? this.getLinkAccountsBanner() : this.getRenderedPlaylists()}
             </div>
         )
     }
 }
 
-export default Dashboard;
+const mapStateToProps = state => {
+    return {
+        token: state.token
+    }
+}
+
+export default connect(mapStateToProps, null)(Dashboard);

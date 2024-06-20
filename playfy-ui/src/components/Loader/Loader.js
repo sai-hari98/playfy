@@ -4,8 +4,8 @@ class Loader extends Component {
 
     render() {
         return (
-            <div className="container">
-                <h5>Please wait while we fetch your information...</h5>
+            <div className="container-fluid mt-5 pt-5">
+                <h5 className="text-center">Please wait while we fetch your information...</h5>
             </div>
         );
     }

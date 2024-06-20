@@ -5,6 +5,7 @@ import { createInputObject } from '../../utils/object-utils';
 import { validateField } from '../../utils/validation-utils';
 import { connect } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
+import { isNullOrEmpty } from '../../utils/string-utils';
 
 const Login = (props) => {
 
@@ -93,8 +94,7 @@ const Login = (props) => {
 
 const mapStateToProps = state => {
     return {
-        token: state.idToken,
-        userId: state.userId
+        token : state.token
     }
 }
 

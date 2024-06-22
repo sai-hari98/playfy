@@ -10,6 +10,10 @@ class Dashboard extends Component {
         dashboardData: null
     }
 
+    componentDidMount(){
+        console.log('Dashboard mounted');
+    }
+    
     getDashboardInfo() {
         playfyAxios.get("/dashboard", {headers: {Authorization: `Bearer ${this.props.token}`}}).then(response => {
             this.setState({ dashboardData: response.data });

@@ -9,6 +9,6 @@ security:
   jwt:
     expiration-time: ${JWT_EXPIRATION_TIME}
     secret-key: ${JWT_SECRET_KEY}
-logging:
-  level:
-    root: debug
+#logging:
+#  level:
+#    root: warn

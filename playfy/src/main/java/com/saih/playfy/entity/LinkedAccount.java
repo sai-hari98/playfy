@@ -9,7 +9,6 @@ import org.springframework.data.mongodb.core.mapping.Document;
 public class LinkedAccount {
 
     private String userId;
-    private String playlistId;
     private StreamingProvider provider;
     private String token;
     private String accountId;

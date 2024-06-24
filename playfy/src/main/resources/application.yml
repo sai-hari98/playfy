@@ -5,10 +5,18 @@ spring:
     mongodb:
       uri: ${MONGO_URI}
       database: playfy
+    redis:
+      host: ${REDIS_SERVER_HOST}
+      port: ${REDIS_SERVER_PORT}
 security:
   jwt:
     expiration-time: ${JWT_EXPIRATION_TIME}
     secret-key: ${JWT_SECRET_KEY}
+spotify:
+  token-url: https://accounts.spotify.com/authorize
+  client-id: ${SPOTIFY_CLIENT_ID}
+  scope: playlist-read-private playlist-read-collaborative user-library-read
+
 #logging:
 #  level:
 #    root: warn

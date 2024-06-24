@@ -15,7 +15,7 @@ class LinkedAccounts extends Component {
     }
 
     getLinkedAccounts() {
-        playfyAxios.get("/users/linked-accounts", { headers: { Authorization: `Bearer ${this.props.token}` } }).then(response => {
+        playfyAxios.get("/users/accounts", { headers: { Authorization: `Bearer ${this.props.token}` } }).then(response => {
             this.setUserNames(response.data);
             this.setState({ linkedAccounts: response.data, isLoading: false });
         }).catch(error => {
@@ -39,7 +39,21 @@ class LinkedAccounts extends Component {
     changeUserId(provider, newUserId) {
         let stateCopy = { ...this.state };
         stateCopy[provider] = newUserId;
-        this.setState(stateCopy);
+        this.setState({...stateCopy});
+    }
+
+    linkAccount(provider){
+        let headers = {Authorization : `Bearer ${this.props.token}`}
+        let body = {
+            provider : provider,
+            userId: this.state[provider]
+        }
+        playfyAxios.post("/users/accounts/link", body, {headers: headers}).then(response => {
+            window.location.assign(response.data);
+        }).catch(error => {
+            console.log(error);
+            alert('An error has occurred while linking your account');
+        });
     }
 
     isAccountLinked(provider) {
@@ -56,9 +70,9 @@ class LinkedAccounts extends Component {
                 {this.state.linkedAccounts == null ? <Loader /> : (
                     <div className="container-fluid mt-5 pb-5">
                         <h5 className="mt-3 mb-5">Linked Music accounts</h5>
-                        <LinkedAccount header="Spotify" provider="spotify" userId={this.state.spotify} changeUserId={this.changeUserId} isLinked={this.isAccountLinked('spotify')} />
-                        <LinkedAccount header="Amazon Prime Music" provider="primemusic" userId={this.state.primemusic} changeUserId={this.changeUserId} isLinked={this.isAccountLinked('primeMusic')} />
-                        <LinkedAccount header="Youtube Music" provider="ytmusic" userId={this.state.ytmusic} changeUserId={this.changeUserId} isLinked={this.isAccountLinked('ytMusic')} />
+                        <LinkedAccount header="Spotify" provider="spotify" userId={this.state.spotify} changeUserId={(provider) => this.changeUserId(provider)} isLinked={this.isAccountLinked('spotify')} linkAccount={(provider) => this.linkAccount(provider)} />
+                        <LinkedAccount header="Amazon Prime Music" provider="primemusic" userId={this.state.primemusic} changeUserId={(provider) => this.changeUserId(provider)} isLinked={this.isAccountLinked('primeMusic')} linkAccount={(provider) => this.linkAccount(provider)}/>
+                        <LinkedAccount header="Youtube Music" provider="ytmusic" userId={this.state.ytmusic} changeUserId={(provider) => this.changeUserId(provider)} isLinked={this.isAccountLinked('ytMusic')} linkAccount={(provider) => this.linkAccount(provider)}/>
                     </div>
                 )}
             </>

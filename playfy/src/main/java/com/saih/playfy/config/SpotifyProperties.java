@@ -7,12 +7,18 @@ import org.springframework.stereotype.Component;
 
 @Data
 @Component
-@ConfigurationProperties
-public class PlayfyProperties {
+@ConfigurationProperties(prefix = "spotify")
+public class SpotifyProperties {
 
-    @Value("{spotify.clientid}")
+    @Value("{client-id}")
     private String clientId;
 
-    @Value("{spotify.clientsecret}")
+    @Value("{clientsecret}")
     private String clientSecret;
+
+    @Value("{token-url}")
+    private String tokenUrl;
+
+    @Value("{scope}")
+    private String scope;
 }

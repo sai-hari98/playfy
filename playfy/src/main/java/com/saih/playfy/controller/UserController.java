@@ -1,11 +1,13 @@
 package com.saih.playfy.controller;
 
+import com.saih.playfy.dto.LinkedAccountSaveDto;
 import com.saih.playfy.dto.LinkedAccountsResponse;
 import com.saih.playfy.entity.LinkedAccount;
 import com.saih.playfy.entity.User;
 import com.saih.playfy.service.LinkedAccountsService;
 import com.saih.playfy.service.UserService;
 import com.saih.playfy.util.PlayfyUtils;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -34,8 +36,18 @@ public class UserController {
         return new ResponseEntity<>(true, HttpStatus.CREATED);
     }
 
-    @GetMapping("/linked-accounts")
+    @GetMapping("/accounts")
     public LinkedAccountsResponse getLinkedAccounts(){
         return linkedAccountsService.getUserLinkedAccounts();
+    }
+
+    @PostMapping("/accounts/link")
+    public ResponseEntity<String> linkAccount(@Valid @RequestBody LinkedAccount linkedAccount){
+        return new ResponseEntity<>(linkedAccountsService.linkAccount(linkedAccount), HttpStatus.OK);
+    }
+
+    @PostMapping("/accounts/save")
+    public ResponseEntity<Boolean> saveAccount(@Valid @RequestBody LinkedAccountSaveDto linkedAccountSaveDto){
+        linkedAccountsService.saveAccount(linkedAccountSaveDto);
     }
 }

@@ -1,6 +1,6 @@
 package com.saih.playfy.dao;
 
-import com.saih.playfy.config.PlayfyProperties;
+import com.saih.playfy.config.SpotifyProperties;
 import com.saih.playfy.entity.AuthResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -18,7 +18,7 @@ public class SpotifyAuthDao {
     private RestTemplate spotifyRestTemplate;
 
     @Autowired
-    private PlayfyProperties playfyProperties;
+    private SpotifyProperties spotifyProperties;
 
     public AuthResponse getSpotifyAuthentication(){
         HttpHeaders headers = new HttpHeaders();
@@ -26,8 +26,8 @@ public class SpotifyAuthDao {
 
         MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
         map.add("grant_type","client_credentials");
-        map.add("client_id", playfyProperties.getClientId());
-        map.add("client_secret", playfyProperties.getClientId());
+        map.add("client_id", spotifyProperties.getClientId());
+        map.add("client_secret", spotifyProperties.getClientId());
 
         HttpEntity<MultiValueMap<String, String>> entity = new HttpEntity<>(map, headers);
 

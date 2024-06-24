@@ -11,9 +11,14 @@ import org.springframework.web.util.DefaultUriBuilderFactory;
 public class PlayfyConfig {
 
     @Bean("spotifyRestTemplate")
-    public RestTemplate initializeRestTemplate(){
+    public RestTemplate initializeSpotifyRestTemplate(){
         RestTemplate template = new RestTemplate();
         template.setUriTemplateHandler(new DefaultUriBuilderFactory("https://api.spotify.com"));
         return template;
+    }
+
+    @Bean("restTemplate")
+    public RestTemplate initializeRestTemplate(){
+        return new RestTemplate();
     }
 }

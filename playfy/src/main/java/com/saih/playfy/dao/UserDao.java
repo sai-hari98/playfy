@@ -7,6 +7,7 @@ import com.saih.playfy.util.PasswordUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -17,9 +18,16 @@ public class UserDao {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private PasswordUtil passwordUtil;
+
+    public User getUser(String userId){
+        return userRepository.findById(userId).orElseThrow(() -> new BusinessException(HttpStatus.BAD_REQUEST, "Invalid User ID"));
+    }
+
     public void createUser(User user) {
         try{
-            user.setPassword(PasswordUtil.hashPassword(user.getPassword()));
+            user.setPassword(passwordUtil.hashPassword(user.getPassword()));
             userRepository.save(user);
         }catch(Exception e){
             log.error("Exception while creating user", e);

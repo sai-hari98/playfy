@@ -1,28 +1,28 @@
 package com.saih.playfy.util;
 
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
+import com.saih.playfy.exception.BusinessException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.stereotype.Component;
 
+@Component
 public class PasswordUtil {
 
-    public static String hashPassword(String password) throws NoSuchAlgorithmException {
-        final MessageDigest digest = MessageDigest.getInstance("SHA3-256");
-        final byte[] hashbytes = digest.digest(
-                password.getBytes(StandardCharsets.UTF_8));
-        return bytesToHex(hashbytes);
-    }
+    private static final Logger log = LoggerFactory.getLogger(PasswordUtil.class);
 
-    private static String bytesToHex(byte[] hash) {
-        StringBuilder hexString = new StringBuilder(2 * hash.length);
-        for (byte b : hash) {
-            String hex = Integer.toHexString(0xff & b);
-            if (hex.length() == 1) {
-                hexString.append('0');
-            }
-            hexString.append(hex);
+    @Autowired
+    private BCryptPasswordEncoder passwordEncoder;
+
+    public String hashPassword(String encodedPassword) {
+        try{
+            return passwordEncoder.encode(encodedPassword);
+        }catch(Exception exception){
+            log.error("Error occurred while hashing password from encoded password", exception);
+            throw new BusinessException(HttpStatus.INTERNAL_SERVER_ERROR, "Sorry! We're unable to process your request. Please try again after sometime.");
         }
-        return hexString.toString();
     }
 
 }

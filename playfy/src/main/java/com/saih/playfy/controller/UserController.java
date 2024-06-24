@@ -49,5 +49,6 @@ public class UserController {
     @PostMapping("/accounts/save")
     public ResponseEntity<Boolean> saveAccount(@Valid @RequestBody LinkedAccountSaveDto linkedAccountSaveDto){
         linkedAccountsService.saveAccount(linkedAccountSaveDto);
+        return new ResponseEntity<>(true, HttpStatus.OK);
     }
 }

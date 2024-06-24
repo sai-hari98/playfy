@@ -57,6 +57,6 @@ public class LinkedAccountsService {
     public void saveAccount(LinkedAccountSaveDto linkedAccountSaveDto) {
         LinkedAccount linkedAccount = linkedAccountsDao.getAccountInfoFromCache(URLDecoder.decode(linkedAccountSaveDto.getIdentifier(), StandardCharsets.UTF_8));
         linkedAccount.setToken(linkedAccount.getToken());
-
+        linkedAccountsRepository.save(linkedAccount);
     }
 }

@@ -3,8 +3,14 @@ import playfyAxios from "../../playfy-axios";
 import Loader from "../Loader/Loader";
 import { connect } from "react-redux";
 import { Link } from "react-router-dom";
+import { withCookies, Cookies } from 'react-cookie';
+import {instanceOf} from 'prop-types';
 
 class Dashboard extends Component {
+
+    static propTypes = {
+        cookies: instanceOf(Cookies).isRequired,
+    };
 
     state = {
         dashboardData: null
@@ -13,9 +19,17 @@ class Dashboard extends Component {
     componentDidMount(){
         console.log('Dashboard mounted');
     }
+
+    getToken(){
+        const {cookies} = this.props;
+        console.log(this.props);
+        console.log(cookies);
+        console.log(cookies.get('token'));
+        return cookies.get('token');
+    }
     
     getDashboardInfo() {
-        playfyAxios.get("/dashboard", {headers: {Authorization: `Bearer ${this.props.token}`}}).then(response => {
+        playfyAxios.get("/dashboard", {headers: {Authorization: `Bearer ${this.getToken()}`}}).then(response => {
             this.setState({ dashboardData: response.data });
         }).catch(error => {
             console.log(error);
@@ -51,11 +65,11 @@ class Dashboard extends Component {
                     return (
                         <div className="col-4">
                             <div className="card">
-                                <img src="..." class="card-img-top" alt="..." />
+                                <img src="..." className="card-img-top" alt="..." />
                                 <div className="card-body">
-                                    <h5 class="card-title">{playlist.title}</h5>
-                                    <a href="#" class="card-link material-symbols-outlined">sync</a>
-                                    <a href="#" class="card-link material-symbols-outlined">download</a>
+                                    <h5 className="card-title">{playlist.title}</h5>
+                                    <a href="#" className="card-link material-symbols-outlined">sync</a>
+                                    <a href="#" className="card-link material-symbols-outlined">download</a>
                                 </div>
                             </div>
                         </div>
@@ -78,10 +92,4 @@ class Dashboard extends Component {
     }
 }
 
-const mapStateToProps = state => {
-    return {
-        token: state.token
-    }
-}
-
-export default connect(mapStateToProps, null)(Dashboard);
+export default withCookies(Dashboard);

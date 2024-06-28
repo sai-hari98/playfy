@@ -44,9 +44,9 @@ const Login = (props) => {
     }
 
     const login = () => {
-        playfyAxios.post("/auth/login",{"userId" : state.username.value, "password" : btoa(state.password.value)}).then(response => {
-            props.login(response.data);
+        playfyAxios.post("/auth/login",{"userId" : state.username.value, "password" : btoa(state.password.value)},{withCredentials: true}).then(response => {
             alert("Login Successful! Redirecting to dashboard...");
+            // window.location.href = "./dashboard";
             navigate("/dashboard");
         }).catch(error => {
             console.log(error);

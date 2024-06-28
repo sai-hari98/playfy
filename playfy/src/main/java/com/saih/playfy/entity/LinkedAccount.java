@@ -6,9 +6,11 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.io.Serializable;
+
 @Data
 @Document("linkedaccounts")
-public class LinkedAccount {
+public class LinkedAccount implements Serializable {
 
     @NotEmpty(message = "Please provide a valid user id")
     private String userId;

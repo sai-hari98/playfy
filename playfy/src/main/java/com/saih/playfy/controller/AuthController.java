@@ -2,6 +2,8 @@ package com.saih.playfy.controller;
 
 import com.saih.playfy.dto.LoginRequest;
 import com.saih.playfy.service.AuthService;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -19,7 +21,9 @@ public class AuthController {
     private AuthService authService;
 
     @PostMapping("/login")
-    public ResponseEntity<String> login(@Valid @RequestBody LoginRequest loginRequest){
-        return new ResponseEntity<>(authService.login(loginRequest), HttpStatus.OK);
+    public ResponseEntity<String> login(@Valid @RequestBody LoginRequest loginRequest, HttpServletResponse httpServletResponse){
+        Cookie cookie = authService.login(loginRequest);
+        httpServletResponse.addCookie(cookie);
+        return new ResponseEntity<>("Authenticated", HttpStatus.OK);
     }
 }

@@ -16,3 +16,10 @@ spotify:
   token-url: https://accounts.spotify.com/authorize
   client-id: client-id
   scope: playlist-read-private playlist-read-collaborative user-library-read
+  redirectUri: http://localhost:3000
+  grantTypes:
+    accessToken: 'authorization_code'
+    refreshToken: 'refresh_token'
+  playlistLimit: 20
+  playlistGetUrl: /v1/me/playlists?offset={offset}&limit={limit}
+  apiDomain: https://api.spotify.com

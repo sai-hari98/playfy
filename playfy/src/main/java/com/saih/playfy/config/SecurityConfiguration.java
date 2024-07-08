@@ -1,6 +1,7 @@
 package com.saih.playfy.config;
 
 import com.saih.playfy.filter.JwtFilter;
+import com.saih.playfy.handler.AuthenticationFailureHandler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -21,13 +22,16 @@ public class SecurityConfiguration {
 
     private final AuthenticationProvider authenticationProvider;
     private final JwtFilter jwtFilter;
+    private final AuthenticationFailureHandler authenticationFailureHandler;
 
     public SecurityConfiguration(
             JwtFilter jwtFilter,
-            AuthenticationProvider authenticationProvider
+            AuthenticationProvider authenticationProvider,
+            AuthenticationFailureHandler authenticationFailureHandler
     ) {
         this.authenticationProvider = authenticationProvider;
         this.jwtFilter = jwtFilter;
+        this.authenticationFailureHandler = authenticationFailureHandler;
     }
 
     @Bean
@@ -50,24 +54,13 @@ public class SecurityConfiguration {
                             .authenticated())
                 .sessionManagement((sessionManagement) -> sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider)
-                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
+                .formLogin(form -> {
+                    form.failureHandler(authenticationFailureHandler);
+                })
+        ;
 
         return http.build();
     }
-
-/*    @Bean
-    CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedMethods(List.of("GET","POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
-        configuration.setAllowedHeaders(List.of("Authorization","Content-Type"));
-
-        configuration.setAllowedOrigins(List.of("http://localhost:3000"));
-
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-
-        source.registerCorsConfiguration("/**",configuration);
-
-        return source;
-    }*/
 
 }

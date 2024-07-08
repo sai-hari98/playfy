@@ -1,5 +1,7 @@
 package com.saih.playfy.entity;
 
+import com.saih.playfy.constant.StreamingProvider;
+import com.saih.playfy.util.PlayfyUtils;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -10,6 +12,16 @@ public class Playlist {
 
     @Id
     private String playlistId;
+    private StreamingProvider provider;
     private String userId;
+    private String createdBy;
     private String thumbnailUrl;
+
+    public Playlist(String playlistId, StreamingProvider provider, String createdBy, String thumbnailUrl){
+        this.playlistId = playlistId;
+        this.provider = provider;
+        this.createdBy = createdBy;
+        this.thumbnailUrl = thumbnailUrl;
+        this.userId = PlayfyUtils.getLoggedInUserId();
+    }
 }

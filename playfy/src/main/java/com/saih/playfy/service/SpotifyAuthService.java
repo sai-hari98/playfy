@@ -1,17 +1,19 @@
 package com.saih.playfy.service;
 
-import com.saih.playfy.config.SpotifyProperties;
+import com.saih.playfy.spotify.config.SpotifyProperties;
+import com.saih.playfy.constant.SpotifyGrantType;
+import com.saih.playfy.constant.StreamingProvider;
 import com.saih.playfy.dao.SpotifyAuthDao;
-import com.saih.playfy.entity.AuthResponse;
-import jakarta.servlet.http.HttpServletResponse;
+import com.saih.playfy.dto.SpotifyAuthResponse;
+import com.saih.playfy.entity.LinkedAccount;
+import com.saih.playfy.entity.SpotifyToken;
+import com.saih.playfy.util.PlayfyUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.UUID;
 
 @Service
 public class SpotifyAuthService {
@@ -20,30 +22,31 @@ public class SpotifyAuthService {
     private SpotifyAuthDao spotifyAuthDao;
 
     @Autowired
-    private SpotifyProperties spotifyProperties;
+    private LinkedAccountsService linkedAccountsService;
 
-    private static AuthResponse authResponse;
+    public SpotifyAuthResponse getAccessToken(SpotifyToken spotifyToken){
+        return spotifyAuthDao.getToken(spotifyToken, SpotifyGrantType.ACCESS_TOKEN);
+    }
 
-    public String getAuthToken(){
-        if(authResponse == null || (System.currentTimeMillis() - authResponse.getResponseReceivedTime() > authResponse.getExpiry())){
-            authResponse = spotifyAuthDao.getSpotifyAuthentication();
+    public SpotifyAuthResponse refreshToken(SpotifyToken spotifyToken){
+        return spotifyAuthDao.getToken(spotifyToken, SpotifyGrantType.REFRESH_TOKEN);
+    }
+
+    public SpotifyToken getSpotifyToken(){
+        String userId = PlayfyUtils.getLoggedInUserId();
+        String tokenKey = String.join("","spotify-token-",userId);
+        SpotifyToken token = spotifyAuthDao.getTokenFromCache(tokenKey);
+        if(token == null) {
+            token = initToken();
         }
-
-        return authResponse.getToken();
+        return token;
     }
 
-    public String getSpotifyRedirectUrlToLink(String identifier){
-        return UriComponentsBuilder.fromUriString(spotifyProperties.getTokenUrl())
-                .queryParam("response_type", "code")
-                .queryParam("client_id", encodeUtf8(spotifyProperties.getClientId()))
-                .queryParam("scope", encodeUtf8(spotifyProperties.getScope()))
-                .queryParam("redirect_uri", encodeUtf8("http://localhost:3000/linked-accounts/spotify"))
-                .queryParam("state", encodeUtf8(identifier))
-                .build()
-                .toUriString();
+    private SpotifyToken initToken(){
+        LinkedAccount linkedAccount = linkedAccountsService.getUserLinkedAccountByProvider(StreamingProvider.SPOTIFY);
+        SpotifyToken spotifyToken = new SpotifyToken(linkedAccount.getUserId(), linkedAccount.getToken(), this);
+        return spotifyToken;
     }
 
-    private static String encodeUtf8(String val) {
-        return URLEncoder.encode(val, StandardCharsets.UTF_8);
-    }
+
 }

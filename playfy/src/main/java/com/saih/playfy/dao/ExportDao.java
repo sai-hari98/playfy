@@ -20,7 +20,6 @@ public class ExportDao {
 
     public String getPlaylistId(String playlistName){
         String url = "/v1/search?q=%s&type=playlist".formatted(playlistName);
-        String token = spotifyAuthService.getAuthToken();
         SpotifySearchResponse searchResponse = spotifyRestTemplate.getForObject(url, SpotifySearchResponse.class);
         if(searchResponse != null && searchResponse.getPlaylists() != null && !searchResponse.getPlaylists().isEmpty()
                 && searchResponse.getPlaylists().getFirst().getName().equalsIgnoreCase(playlistName)){

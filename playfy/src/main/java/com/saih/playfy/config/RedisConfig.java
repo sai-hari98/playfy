@@ -1,6 +1,7 @@
 package com.saih.playfy.config;
 
 import com.saih.playfy.entity.LinkedAccount;
+import com.saih.playfy.entity.SpotifyToken;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -30,4 +31,14 @@ public class RedisConfig {
         template.setConnectionFactory(redisConnectionFactory());
         return template;
     }
+
+    @Bean
+    @Qualifier("spotifyTokenRedisTemplate")
+    public RedisTemplate<String, SpotifyToken> spotifyTokenRedisTemplate() {
+        RedisTemplate<String, SpotifyToken> template = new RedisTemplate<>();
+        template.setConnectionFactory(redisConnectionFactory());
+        return template;
+    }
+
+
 }

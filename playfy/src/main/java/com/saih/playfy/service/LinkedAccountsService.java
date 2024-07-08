@@ -6,12 +6,15 @@ import com.saih.playfy.dto.LinkedAccountSaveDto;
 import com.saih.playfy.dto.LinkedAccountsResponse;
 import com.saih.playfy.entity.LinkedAccount;
 import com.saih.playfy.repository.LinkedAccountsRepository;
+import com.saih.playfy.spotify.config.SpotifyProperties;
 import com.saih.playfy.util.PlayfyUtils;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.UUID;
@@ -23,7 +26,7 @@ public class LinkedAccountsService {
     private LinkedAccountsRepository linkedAccountsRepository;
 
     @Autowired
-    private SpotifyAuthService spotifyAuthService;
+    private SpotifyProperties spotifyProperties;
 
     @Autowired
     private LinkedAccountsDao linkedAccountsDao;
@@ -32,10 +35,22 @@ public class LinkedAccountsService {
         if(linkedAccount.getProvider().equals(StreamingProvider.SPOTIFY)){
             String identifier = UUID.randomUUID().toString();
             linkedAccountsDao.cacheAccountInfoToLink(identifier, linkedAccount);
-            return spotifyAuthService.getSpotifyRedirectUrlToLink(identifier);
+            return UriComponentsBuilder.fromUriString(spotifyProperties.getTokenUrl())
+                    .queryParam("response_type", "code")
+                    .queryParam("client_id", encodeUtf8(spotifyProperties.getClientId()))
+                    .queryParam("scope", encodeUtf8(spotifyProperties.getScope()))
+                    .queryParam("redirect_uri", encodeUtf8("http://localhost:3000/linked-accounts/spotify"))
+                    .queryParam("state", encodeUtf8(identifier))
+                    .build()
+                    .toUriString();
         }
         return null;
     }
+
+    public LinkedAccount getUserLinkedAccountByProvider(StreamingProvider streamingProvider){
+        return linkedAccountsDao.getLinkedAccountByProvider(streamingProvider);
+    }
+
     public List<LinkedAccount> getAllLinkedAccountsForUser(String userId){
         return linkedAccountsRepository.findByUserId(userId);
     }
@@ -58,5 +73,9 @@ public class LinkedAccountsService {
         LinkedAccount linkedAccount = linkedAccountsDao.getAccountInfoFromCache(URLDecoder.decode(linkedAccountSaveDto.getIdentifier(), StandardCharsets.UTF_8));
         linkedAccount.setToken(linkedAccountSaveDto.getToken());
         linkedAccountsRepository.save(linkedAccount);
+    }
+
+    private static String encodeUtf8(String val) {
+        return URLEncoder.encode(val, StandardCharsets.UTF_8);
     }
 }

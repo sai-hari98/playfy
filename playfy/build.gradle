@@ -2,6 +2,7 @@ plugins {
 	id 'java'
 	id 'org.springframework.boot' version '3.3.0'
 	id 'io.spring.dependency-management' version '1.1.5'
+	id 'jacoco'
 }
 
 group = 'com.saih'
@@ -11,6 +12,11 @@ java {
 	toolchain {
 		languageVersion = JavaLanguageVersion.of(21)
 	}
+}
+
+jacoco {
+	toolVersion = "0.8.11" // Specify the JaCoCo version
+	reportsDirectory = layout.buildDirectory.dir("reports/jacoco/test") // Set the output directory for reports
 }
 
 repositories {
@@ -34,4 +40,15 @@ dependencies {
 
 tasks.named('test') {
 	useJUnitPlatform()
+	finalizedBy jacocoTestReport
+}
+
+jacocoTestReport {
+	dependsOn test // Ensure tests are run before generating the report
+
+	reports {
+		xml.required = true // Generate XML report for CI/CD tools
+		html.required = true // Generate HTML report for easier viewing
+		html.outputLocation = layout.buildDirectory.dir('jacocoHtml')
+	}
 }

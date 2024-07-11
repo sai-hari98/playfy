@@ -1,0 +1,22 @@
+pipeline {
+    agent any
+    steps {
+        stage("Checkout"){
+            git branch:'dashboard', url:'https://github.com/sai-hari98/playfy'
+        }
+        dir('playfy') {
+            stage("Build"){
+                sh "./gradlew build"
+            }
+            stage("Upload JAR"){
+                archiveArtifacts artifacts: '**/build/libs/*.jar', followSymlinks: false
+            }
+            stage("Capture Test Reports"){
+                junit testResults: '**/build/test-results/test/TEST-*.xml'
+            }
+            stage("Capture Code Coverage") {
+                jacoco()
+            }
+        }
+    }
+}

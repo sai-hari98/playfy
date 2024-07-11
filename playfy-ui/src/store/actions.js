@@ -1,1 +1,0 @@
-export {logIn, logOut} from './reducers/auth';

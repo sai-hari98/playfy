@@ -1,5 +1,6 @@
 package com.saih.playfy.dao;
 
+import com.saih.playfy.exception.RedirectException;
 import com.saih.playfy.spotify.config.SpotifyProperties;
 import com.saih.playfy.entity.Playlist;
 import com.saih.playfy.entity.SpotifyToken;
@@ -57,7 +58,9 @@ public class SpotifyPlaylistDao {
                 }
             }
             return spotifyPlaylists.stream().map(SpotifyPlaylist::toPlaylist).collect(Collectors.toList());
-        } catch(Exception exception){
+        } catch (RedirectException redirectException) {
+            throw redirectException;
+        } catch(Exception exception) {
             log.error("Exception occurred while fetching spotify playlists", exception);
             throw new BusinessException("Sorry, we're unable to fetch your spotify playlists. Please try again later");
         }
@@ -65,7 +68,7 @@ public class SpotifyPlaylistDao {
 
     private static HttpEntity<String> getHttpEntityForHeaders(SpotifyToken spotifyToken) {
         HttpHeaders headers = new HttpHeaders();
-        headers.add("Authorization", String.join(" ", "Bearer", spotifyToken.getAuthToken()));
+        headers.add("Authorization", String.join(" ", "Bearer", spotifyToken.getToken()));
         return new HttpEntity<>(headers);
     }
 }

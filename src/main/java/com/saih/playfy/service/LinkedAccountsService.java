@@ -35,7 +35,7 @@ public class LinkedAccountsService {
         if(linkedAccount.getProvider().equals(StreamingProvider.SPOTIFY)){
             String identifier = UUID.randomUUID().toString();
             linkedAccountsDao.cacheAccountInfoToLink(identifier, linkedAccount);
-            return UriComponentsBuilder.fromUriString(spotifyProperties.getTokenUrl())
+            return UriComponentsBuilder.fromUriString(String.join("/", spotifyProperties.getTokenUrl(),"authorize"))
                     .queryParam("response_type", "code")
                     .queryParam("client_id", encodeUtf8(spotifyProperties.getClientId()))
                     .queryParam("scope", encodeUtf8(spotifyProperties.getScope()))

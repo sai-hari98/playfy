@@ -13,8 +13,9 @@ security:
     expiration-time: ${JWT_EXPIRATION_TIME}
     secret-key: ${JWT_SECRET_KEY}
 spotify:
-  tokenUrl: https://accounts.spotify.com/authorize
+  tokenUrl: https://accounts.spotify.com
   clientId: ${SPOTIFY_CLIENT_ID}
+  clientSecret: ${SPOTIFY_CLIENT_SECRET}
   scope: playlist-read-private playlist-read-collaborative user-library-read
   redirectUri: ${REDIRECT_URI}
   grantTypes:
@@ -25,7 +26,7 @@ spotify:
   apiDomain: https://api.spotify.com
 
 server:
-  port: 8090
+  port: 8080
 #logging:
 #  level:
 #    root: warn

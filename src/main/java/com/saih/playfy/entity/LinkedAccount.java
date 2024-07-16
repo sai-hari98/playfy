@@ -18,4 +18,11 @@ public class LinkedAccount implements Serializable {
     private StreamingProvider provider;
     private String token;
     private String accountId;
+
+    public LinkedAccount() {}
+
+    public LinkedAccount(String userId, StreamingProvider streamingProvider){
+        this.userId = userId;
+        this.provider = streamingProvider;
+    }
 }

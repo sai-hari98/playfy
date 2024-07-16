@@ -6,9 +6,9 @@ import java.util.List;
 
 @Data
 public class ErrorResponse {
-    private List<String> errorMessages;
+    private List<Error> errors;
 
-    public ErrorResponse(List<String> errorMessages){
-        this.errorMessages = errorMessages;
+    public ErrorResponse(List<Error> errors){
+        this.errors = errors;
     }
 }

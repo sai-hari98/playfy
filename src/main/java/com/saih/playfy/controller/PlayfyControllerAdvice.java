@@ -1,7 +1,10 @@
 package com.saih.playfy.controller;
 
+import com.saih.playfy.dto.Error;
 import com.saih.playfy.dto.ErrorResponse;
 import com.saih.playfy.exception.BusinessException;
+import com.saih.playfy.exception.RedirectException;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
@@ -19,18 +22,25 @@ import java.util.List;
 @ControllerAdvice
 public class PlayfyControllerAdvice {
 
+    @ExceptionHandler(value = {RedirectException.class})
+    public ResponseEntity<ErrorResponse> handleRedirectException(RedirectException redirectException){
+        Error error = new Error("REDIRECT", redirectException.getRedirectUrl());
+        return new ResponseEntity<>(new ErrorResponse(Collections.singletonList(error)), HttpStatus.UNAUTHORIZED);
+    }
+
     @ExceptionHandler(value = {BusinessException.class})
     public ResponseEntity<ErrorResponse> handleBusinessException(BusinessException businessException){
-        return new ResponseEntity<>(new ErrorResponse(Collections.singletonList(businessException.getMessage())), businessException.getHttpStatus());
+        Error error = new Error(businessException.getMessage());
+        return new ResponseEntity<>(new ErrorResponse(Collections.singletonList(error)), businessException.getHttpStatus());
     }
 
     @ExceptionHandler(value = {MethodArgumentNotValidException.class})
     public ResponseEntity<ErrorResponse> handleMethodArgumentNotValidException(MethodArgumentNotValidException methodArgumentNotValidException){
-        List<String> errorMessages = new ArrayList<>();
+        List<Error> errors = new ArrayList<>();
         List<FieldError> fieldErrors = methodArgumentNotValidException.getBindingResult().getFieldErrors();
         for(FieldError fieldError : fieldErrors)
-            errorMessages.add(fieldError.getDefaultMessage());
-        return new ResponseEntity<>(new ErrorResponse(errorMessages), HttpStatus.BAD_REQUEST);
+            errors.add(new Error(fieldError.getDefaultMessage()));
+        return new ResponseEntity<>(new ErrorResponse(errors), HttpStatus.BAD_REQUEST);
     }
 
     /*@ExceptionHandler(value = {Exception.class})

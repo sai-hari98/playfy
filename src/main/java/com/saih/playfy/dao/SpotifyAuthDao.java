@@ -1,5 +1,6 @@
 package com.saih.playfy.dao;
 
+import com.saih.playfy.exception.RedirectException;
 import com.saih.playfy.spotify.config.SpotifyProperties;
 import com.saih.playfy.constant.SpotifyGrantType;
 import com.saih.playfy.dto.SpotifyAuthResponse;
@@ -11,6 +12,7 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Base64;
@@ -19,8 +21,8 @@ import java.util.Base64;
 public class SpotifyAuthDao {
 
     @Autowired
-    @Qualifier("spotifyRestTemplate")
-    private RestTemplate spotifyRestTemplate;
+    @Qualifier("spotifyAuthRestTemplate")
+    private RestTemplate spotifyAuthRestTemplate;
 
     @Autowired
     private SpotifyProperties spotifyProperties;
@@ -31,24 +33,32 @@ public class SpotifyAuthDao {
     private RedisTemplate<String, SpotifyToken> spotifyTokenRedisTemplate;
 
     public SpotifyAuthResponse getToken(SpotifyToken spotifyToken, SpotifyGrantType spotifyGrantType) {
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+        try{
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 
-        MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
-        map.add("grant_type",spotifyProperties.getGrantTypes().get(spotifyGrantType.getGrantType()));
-        map.add("code", spotifyToken.getAuthToken());
-        if(SpotifyGrantType.ACCESS_TOKEN.equals(spotifyGrantType)) {
-            map.add("redirect_uri", spotifyProperties.getRedirectUri());
-            headers.add("Authorization", "Basic "+ getEncodedClientIDAndSecret());
+            MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
+            map.add("grant_type",spotifyProperties.getGrantTypes().get(spotifyGrantType.getGrantType()));
+            map.add("code", spotifyToken.getCode());
+            if(SpotifyGrantType.ACCESS_TOKEN.equals(spotifyGrantType)) {
+                map.add("redirect_uri", spotifyProperties.getRedirectUri());
+                headers.add("Authorization", "Basic "+ getEncodedClientIDAndSecret());
+            }
+            if(SpotifyGrantType.REFRESH_TOKEN.equals(spotifyGrantType)) {
+                map.add("client_id", spotifyProperties.getClientId());
+            }
+
+            HttpEntity<MultiValueMap<String, String>> entity = new HttpEntity<>(map, headers);
+
+            ResponseEntity<SpotifyAuthResponse> authResponseEntity = spotifyAuthRestTemplate.exchange("/api/token", HttpMethod.POST, entity, SpotifyAuthResponse.class);
+            return authResponseEntity.getBody();
+        }catch(HttpClientErrorException httpClientErrorException){
+            if(httpClientErrorException.getStatusCode().equals(HttpStatus.BAD_REQUEST)
+                && httpClientErrorException.getResponseBodyAsString().contains("Authorization code expired")){
+                throw new RedirectException(String.join("/",spotifyProperties.getTokenUrl(),"authorize"));
+            }
+            throw httpClientErrorException;
         }
-        if(SpotifyGrantType.REFRESH_TOKEN.equals(spotifyGrantType)) {
-            map.add("client_id", spotifyProperties.getClientId());
-        }
-
-        HttpEntity<MultiValueMap<String, String>> entity = new HttpEntity<>(map, headers);
-
-        ResponseEntity<SpotifyAuthResponse> authResponseEntity = spotifyRestTemplate.exchange("/api/token", HttpMethod.POST, entity, SpotifyAuthResponse.class);
-        return authResponseEntity.getBody();
     }
 
     public SpotifyToken getTokenFromCache(String key){

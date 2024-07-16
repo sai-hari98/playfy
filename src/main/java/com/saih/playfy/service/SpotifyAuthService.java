@@ -1,5 +1,6 @@
 package com.saih.playfy.service;
 
+import com.saih.playfy.exception.RedirectException;
 import com.saih.playfy.spotify.config.SpotifyProperties;
 import com.saih.playfy.constant.SpotifyGrantType;
 import com.saih.playfy.constant.StreamingProvider;
@@ -25,7 +26,12 @@ public class SpotifyAuthService {
     private LinkedAccountsService linkedAccountsService;
 
     public SpotifyAuthResponse getAccessToken(SpotifyToken spotifyToken){
-        return spotifyAuthDao.getToken(spotifyToken, SpotifyGrantType.ACCESS_TOKEN);
+        try{
+            return spotifyAuthDao.getToken(spotifyToken, SpotifyGrantType.ACCESS_TOKEN);
+        } catch (RedirectException redirectException){
+            String redirectUrl = linkedAccountsService.linkAccount(new LinkedAccount(spotifyToken.getUserId(), StreamingProvider.SPOTIFY));
+            throw new RedirectException(redirectUrl);
+        }
     }
 
     public SpotifyAuthResponse refreshToken(SpotifyToken spotifyToken){

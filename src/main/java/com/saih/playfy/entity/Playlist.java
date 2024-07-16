@@ -16,12 +16,14 @@ public class Playlist {
     private String userId;
     private String createdBy;
     private String thumbnailUrl;
+    private String title;
 
-    public Playlist(String playlistId, StreamingProvider provider, String createdBy, String thumbnailUrl){
+    public Playlist(String playlistId, StreamingProvider provider, String createdBy, String thumbnailUrl, String title){
         this.playlistId = playlistId;
         this.provider = provider;
         this.createdBy = createdBy;
         this.thumbnailUrl = thumbnailUrl;
         this.userId = PlayfyUtils.getLoggedInUserId();
+        this.title = title;
     }
 }

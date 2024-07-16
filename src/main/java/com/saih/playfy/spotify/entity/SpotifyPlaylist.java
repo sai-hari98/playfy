@@ -11,11 +11,12 @@ public class SpotifyPlaylist {
     private String id;
     private List<SpotifyImage> images;
     private SpotifyOwner owner;
+    private String name;
 
     public Playlist toPlaylist() {
         String owner = this.owner.getDisplayName();
         String thumbnailUrl = images.getFirst().getUrl();
         String id = this.id;
-        return new Playlist(id, StreamingProvider.SPOTIFY, owner, thumbnailUrl);
+        return new Playlist(id, StreamingProvider.SPOTIFY, owner, thumbnailUrl, name);
     }
 }

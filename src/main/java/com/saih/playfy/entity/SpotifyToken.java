@@ -2,26 +2,24 @@ package com.saih.playfy.entity;
 
 import com.saih.playfy.dto.SpotifyAuthResponse;
 import com.saih.playfy.service.SpotifyAuthService;
-import lombok.Data;
+import lombok.Getter;
 
 import java.util.Date;
 
 public class SpotifyToken {
-    private String userId;
-    private String authToken;
+    @Getter
+    private final String userId;
+    @Getter
+    private final String code;
     private String accessToken;
     private String refreshToken;
     private Date expiry;
     private SpotifyAuthService spotifyAuthService;
 
-    public SpotifyToken(String userId, String accessToken, SpotifyAuthService spotifyAuthService){
+    public SpotifyToken(String userId, String code, SpotifyAuthService spotifyAuthService){
         this.userId = userId;
-        this.accessToken = accessToken;
+        this.code = code;
         this.spotifyAuthService = spotifyAuthService;
-    }
-
-    public String getAuthToken(){
-        return this.authToken;
     }
 
     public String getToken() {

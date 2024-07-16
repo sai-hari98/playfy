@@ -20,6 +20,13 @@ public class PlayfyConfig {
         return template;
     }
 
+    @Bean("spotifyAuthRestTemplate")
+    public RestTemplate initializeSpotifyAuthRestTemplate(){
+        RestTemplate template = new RestTemplate();
+        template.setUriTemplateHandler(new DefaultUriBuilderFactory(spotifyProperties.getTokenUrl()));
+        return template;
+    }
+
     @Bean("restTemplate")
     public RestTemplate initializeRestTemplate(){
         return new RestTemplate();

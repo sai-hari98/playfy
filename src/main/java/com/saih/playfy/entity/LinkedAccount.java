@@ -16,8 +16,9 @@ public class LinkedAccount implements Serializable {
     private String userId;
     @NotNull(message = "Please provide a valid streaming provider")
     private StreamingProvider provider;
-    private String token;
+    private String authCode;
     private String accountId;
+    private String refreshToken;
 
     public LinkedAccount() {}
 

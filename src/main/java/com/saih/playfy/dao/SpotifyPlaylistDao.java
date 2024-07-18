@@ -68,7 +68,7 @@ public class SpotifyPlaylistDao {
 
     private static HttpEntity<String> getHttpEntityForHeaders(SpotifyToken spotifyToken) {
         HttpHeaders headers = new HttpHeaders();
-        headers.add("Authorization", String.join(" ", "Bearer", spotifyToken.getToken()));
+        headers.add("Authorization", String.join(" ", "Bearer", spotifyToken.getAccessToken()));
         return new HttpEntity<>(headers);
     }
 }

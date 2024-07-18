@@ -39,12 +39,13 @@ public class SpotifyAuthDao {
 
             MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
             map.add("grant_type",spotifyProperties.getGrantTypes().get(spotifyGrantType.getGrantType()));
-            map.add("code", spotifyToken.getCode());
             if(SpotifyGrantType.ACCESS_TOKEN.equals(spotifyGrantType)) {
+                map.add("code", spotifyToken.getAuthCode());
                 map.add("redirect_uri", spotifyProperties.getRedirectUri());
                 headers.add("Authorization", "Basic "+ getEncodedClientIDAndSecret());
             }
             if(SpotifyGrantType.REFRESH_TOKEN.equals(spotifyGrantType)) {
+                map.add("refresh_token", spotifyToken.getRefreshToken());
                 map.add("client_id", spotifyProperties.getClientId());
             }
 
@@ -54,7 +55,8 @@ public class SpotifyAuthDao {
             return authResponseEntity.getBody();
         }catch(HttpClientErrorException httpClientErrorException){
             if(httpClientErrorException.getStatusCode().equals(HttpStatus.BAD_REQUEST)
-                && httpClientErrorException.getResponseBodyAsString().contains("Authorization code expired")){
+                && (httpClientErrorException.getResponseBodyAsString().contains("Authorization code expired")
+            || httpClientErrorException.getResponseBodyAsString().contains("Invalid Authorization code"))){
                 throw new RedirectException(String.join("/",spotifyProperties.getTokenUrl(),"authorize"));
             }
             throw httpClientErrorException;
@@ -63,6 +65,10 @@ public class SpotifyAuthDao {
 
     public SpotifyToken getTokenFromCache(String key){
         return spotifyTokenRedisTemplate.opsForValue().get(key);
+    }
+
+    public void cacheSpotifyToken(String key, SpotifyToken spotifyToken){
+        spotifyTokenRedisTemplate.opsForValue().set(key, spotifyToken);
     }
 
     private String getEncodedClientIDAndSecret(){

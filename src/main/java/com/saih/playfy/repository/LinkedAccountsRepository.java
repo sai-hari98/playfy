@@ -13,4 +13,6 @@ public interface LinkedAccountsRepository extends MongoRepository<LinkedAccount,
     public List<LinkedAccount> findByUserId(String userId);
 
     public List<LinkedAccount> findByUserIdAndProvider(String userId, StreamingProvider provider);
+
+    public long deleteByUserIdAndProvider(String userId, StreamingProvider provider);
 }

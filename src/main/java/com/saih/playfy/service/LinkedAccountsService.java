@@ -5,10 +5,10 @@ import com.saih.playfy.dao.LinkedAccountsDao;
 import com.saih.playfy.dto.LinkedAccountSaveDto;
 import com.saih.playfy.dto.LinkedAccountsResponse;
 import com.saih.playfy.entity.LinkedAccount;
+import com.saih.playfy.entity.SpotifyToken;
 import com.saih.playfy.repository.LinkedAccountsRepository;
 import com.saih.playfy.spotify.config.SpotifyProperties;
 import com.saih.playfy.util.PlayfyUtils;
-import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -31,6 +31,9 @@ public class LinkedAccountsService {
     @Autowired
     private LinkedAccountsDao linkedAccountsDao;
 
+    @Autowired
+    private SpotifyAuthService spotifyAuthService;
+
     public String linkAccount(LinkedAccount linkedAccount){
         if(linkedAccount.getProvider().equals(StreamingProvider.SPOTIFY)){
             String identifier = UUID.randomUUID().toString();
@@ -45,6 +48,11 @@ public class LinkedAccountsService {
                     .toUriString();
         }
         return null;
+    }
+
+    public String updateAuthCode(LinkedAccount linkedAccount){
+        linkedAccountsRepository.deleteByUserIdAndProvider(linkedAccount.getUserId(), linkedAccount.getProvider());
+        return linkAccount(linkedAccount);
     }
 
     public LinkedAccount getUserLinkedAccountByProvider(StreamingProvider streamingProvider){
@@ -70,8 +78,12 @@ public class LinkedAccountsService {
     }
 
     public void saveAccount(LinkedAccountSaveDto linkedAccountSaveDto) {
-        LinkedAccount linkedAccount = linkedAccountsDao.getAccountInfoFromCache(URLDecoder.decode(linkedAccountSaveDto.getIdentifier(), StandardCharsets.UTF_8));
-        linkedAccount.setToken(linkedAccountSaveDto.getToken());
+        String redisKey = URLDecoder.decode(linkedAccountSaveDto.getIdentifier(), StandardCharsets.UTF_8);
+        LinkedAccount linkedAccount = linkedAccountsDao.getAccountInfoFromCache(redisKey);
+        linkedAccount.setAuthCode(linkedAccountSaveDto.getAuthCode());
+        SpotifyToken spotifyToken = spotifyAuthService.initToken(linkedAccount);
+        linkedAccount.setRefreshToken(spotifyToken.getRefreshToken());
+        linkedAccountsDao.removeAccountInfoFromCache(redisKey);
         linkedAccountsRepository.save(linkedAccount);
     }
 

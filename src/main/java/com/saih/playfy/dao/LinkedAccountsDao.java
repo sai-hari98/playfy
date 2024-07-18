@@ -27,6 +27,10 @@ public class LinkedAccountsDao {
         return redisTemplate.opsForValue().get(key);
     }
 
+    public void removeAccountInfoFromCache(String key){
+        redisTemplate.delete(key);
+    }
+
     public LinkedAccount getLinkedAccountByProvider(StreamingProvider streamingProvider) {
         return linkedAccountsRepository.findByUserIdAndProvider(PlayfyUtils.getLoggedInUserId(), streamingProvider).getFirst();
     }

@@ -1,48 +1,24 @@
 package com.saih.playfy.entity;
 
-import com.saih.playfy.dto.SpotifyAuthResponse;
 import com.saih.playfy.service.SpotifyAuthService;
+import lombok.Data;
 import lombok.Getter;
 
 import java.util.Date;
 
+@Data
 public class SpotifyToken {
-    @Getter
     private final String userId;
-    @Getter
-    private final String code;
+    private final String authCode;
     private String accessToken;
     private String refreshToken;
     private Date expiry;
+    private long expirySeconds;
     private SpotifyAuthService spotifyAuthService;
 
-    public SpotifyToken(String userId, String code, SpotifyAuthService spotifyAuthService){
+    public SpotifyToken(String userId, String authCode, SpotifyAuthService spotifyAuthService){
         this.userId = userId;
-        this.code = code;
+        this.authCode = authCode;
         this.spotifyAuthService = spotifyAuthService;
-    }
-
-    public String getToken() {
-        Date now = new Date();
-        if(this.accessToken == null){
-            this.getAccessToken();
-        }else if(now.after(this.expiry)){
-            this.refreshToken();
-        }
-        return this.accessToken;
-    }
-
-    private void refreshToken(){
-        SpotifyAuthResponse authResponse = spotifyAuthService.refreshToken(this);
-        this.accessToken = authResponse.getToken();
-        this.refreshToken = authResponse.getRefreshToken();
-        this.expiry = new Date(System.currentTimeMillis()+authResponse.getExpiry());
-    }
-
-    private void getAccessToken(){
-        SpotifyAuthResponse authResponse = spotifyAuthService.getAccessToken(this);
-        this.accessToken = authResponse.getToken();
-        this.refreshToken = authResponse.getRefreshToken();
-        this.expiry = new Date(System.currentTimeMillis()+authResponse.getExpiry());
     }
 }

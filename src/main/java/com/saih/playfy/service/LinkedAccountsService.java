@@ -55,10 +55,6 @@ public class LinkedAccountsService {
         return linkAccount(linkedAccount);
     }
 
-    public LinkedAccount getUserLinkedAccountByProvider(StreamingProvider streamingProvider){
-        return linkedAccountsDao.getLinkedAccountByProvider(streamingProvider);
-    }
-
     public List<LinkedAccount> getAllLinkedAccountsForUser(String userId){
         return linkedAccountsRepository.findByUserId(userId);
     }
@@ -84,7 +80,7 @@ public class LinkedAccountsService {
         SpotifyToken spotifyToken = spotifyAuthService.initToken(linkedAccount);
         linkedAccount.setRefreshToken(spotifyToken.getRefreshToken());
         linkedAccountsDao.removeAccountInfoFromCache(redisKey);
-        linkedAccountsRepository.save(linkedAccount);
+        linkedAccountsDao.saveLinkedAccount(linkedAccount);
     }
 
     private static String encodeUtf8(String val) {

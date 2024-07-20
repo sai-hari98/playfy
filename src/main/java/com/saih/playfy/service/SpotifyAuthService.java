@@ -2,6 +2,7 @@ package com.saih.playfy.service;
 
 import com.saih.playfy.constant.SpotifyGrantType;
 import com.saih.playfy.constant.StreamingProvider;
+import com.saih.playfy.dao.LinkedAccountsDao;
 import com.saih.playfy.dao.SpotifyAuthDao;
 import com.saih.playfy.dto.SpotifyAuthResponse;
 import com.saih.playfy.entity.LinkedAccount;
@@ -19,65 +20,59 @@ public class SpotifyAuthService {
     private SpotifyAuthDao spotifyAuthDao;
 
     @Autowired
-    private LinkedAccountsService linkedAccountsService;
+    private LinkedAccountsDao linkedAccountsDao;
 
-    private SpotifyAuthResponse getAccessToken(SpotifyToken spotifyToken){
-        return spotifyAuthDao.getToken(spotifyToken, SpotifyGrantType.ACCESS_TOKEN);
+    private SpotifyToken getAccessToken(SpotifyToken spotifyToken){
+        SpotifyAuthResponse spotifyAuthResponse = spotifyAuthDao.getToken(spotifyToken, SpotifyGrantType.ACCESS_TOKEN);
+        spotifyToken.setAccessToken(spotifyAuthResponse.getToken());
+        spotifyToken.setRefreshToken(spotifyAuthResponse.getRefreshToken());
+        spotifyToken.setExpiry(spotifyAuthResponse.getExpiry());
+        return spotifyToken;
     }
 
-    public SpotifyAuthResponse refreshToken(SpotifyToken spotifyToken){
-        return spotifyAuthDao.getToken(spotifyToken, SpotifyGrantType.REFRESH_TOKEN);
+    public SpotifyToken refreshToken(SpotifyToken spotifyToken){
+        SpotifyAuthResponse spotifyAuthResponse = spotifyAuthDao.getToken(spotifyToken, SpotifyGrantType.REFRESH_TOKEN);
+        spotifyToken.setAccessToken(spotifyAuthResponse.getToken());
+        spotifyToken.setRefreshToken(spotifyAuthResponse.getRefreshToken());
+        spotifyToken.setExpiry(spotifyAuthResponse.getExpiry());
+        return spotifyToken;
     }
 
     public SpotifyToken getSpotifyToken(){
         SpotifyToken token = spotifyAuthDao.getTokenFromCache(getSpotifyTokenRedisKey());
+        Date now = new Date();
         if(token == null) {
             token = initToken();
+        } else if(now.after(token.getExpiry())){
+            refreshToken(token);
+            LinkedAccount linkedAccount = linkedAccountsDao.getUserLinkedAccountByProvider(StreamingProvider.SPOTIFY);
+            linkedAccount.setRefreshToken(token.getRefreshToken());
+            linkedAccountsDao.saveLinkedAccount(linkedAccount);
         }
         return token;
     }
 
     private SpotifyToken initToken(){
-        LinkedAccount linkedAccount = linkedAccountsService.getUserLinkedAccountByProvider(StreamingProvider.SPOTIFY);
-        SpotifyToken spotifyToken = new SpotifyToken(linkedAccount.getUserId(), linkedAccount.getAuthCode(), this);
-        //TODO: get new access token and refresh token from the refresh token in DB
+        LinkedAccount linkedAccount = linkedAccountsDao.getUserLinkedAccountByProvider(StreamingProvider.SPOTIFY);
+        SpotifyToken spotifyToken = SpotifyToken.builder()
+                .userId(linkedAccount.getUserId())
+                .refreshToken(linkedAccount.getRefreshToken())
+                .build();
+        SpotifyToken updatedToken = refreshToken(spotifyToken);
+        linkedAccount.setRefreshToken(updatedToken.getRefreshToken());
+        linkedAccountsDao.updateRefreshToken(linkedAccount);
         return spotifyToken;
     }
 
     public SpotifyToken initToken(LinkedAccount linkedAccount){
-        SpotifyToken spotifyToken = new SpotifyToken(linkedAccount.getUserId(), linkedAccount.getAuthCode(), this);
-        SpotifyAuthResponse spotifyAuthResponse = getAccessToken(spotifyToken);
-        spotifyToken.setAccessToken(spotifyAuthResponse.getToken());
-        spotifyToken.setRefreshToken(spotifyAuthResponse.getRefreshToken());
-        spotifyAuthDao.cacheSpotifyToken(getSpotifyTokenRedisKey(), spotifyToken);
-        return spotifyToken;
+        SpotifyToken spotifyToken = SpotifyToken.builder()
+                .userId(linkedAccount.getUserId())
+                .authCode(linkedAccount.getAuthCode())
+                .build();
+        SpotifyToken updatedToken = getAccessToken(spotifyToken);
+        spotifyAuthDao.cacheSpotifyToken(getSpotifyTokenRedisKey(), updatedToken);
+        return updatedToken;
     }
-
-/*    public String getToken() {
-        SpotifyToken spotifyToken = spotifyAuthDao.getTokenFromCache()
-        Date now = new Date();
-        if(this.accessToken == null){
-            this.getAccessToken();
-        }else if(now.after(this.expiry)){
-            this.refreshToken();
-        }
-        return this.accessToken;
-    }
-
-    private void refreshToken(){
-        SpotifyAuthResponse authResponse = refreshToken(this);
-        this.accessToken = authResponse.getToken();
-        this.refreshToken = authResponse.getRefreshToken();
-        this.expirySeconds = authResponse.getExpiry();
-        this.expiry = new Date(System.currentTimeMillis() + (this.expirySeconds * 1000));
-    }
-
-    private void getAccessToken(){
-        SpotifyAuthResponse authResponse = spotifyAuthService.getAccessToken(this);
-        this.accessToken = authResponse.getToken();
-        this.expirySeconds = authResponse.getExpiry();
-        this.expiry = new Date(System.currentTimeMillis() + (this.expirySeconds * 1000));
-    }*/
 
     private String getSpotifyTokenRedisKey(){
         return String.join("-","spotify","token",PlayfyUtils.getLoggedInUserId());

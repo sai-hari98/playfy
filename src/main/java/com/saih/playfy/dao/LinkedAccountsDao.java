@@ -31,7 +31,16 @@ public class LinkedAccountsDao {
         redisTemplate.delete(key);
     }
 
-    public LinkedAccount getLinkedAccountByProvider(StreamingProvider streamingProvider) {
+    public LinkedAccount getUserLinkedAccountByProvider(StreamingProvider streamingProvider) {
         return linkedAccountsRepository.findByUserIdAndProvider(PlayfyUtils.getLoggedInUserId(), streamingProvider).getFirst();
+    }
+
+    public void saveLinkedAccount(LinkedAccount linkedAccount) {
+        linkedAccountsRepository.save(linkedAccount);
+    }
+
+    public void updateRefreshToken(LinkedAccount linkedAccount){
+        linkedAccountsRepository.deleteByUserIdAndProvider(linkedAccount.getUserId(), linkedAccount.getProvider());
+        linkedAccountsRepository.save(linkedAccount);
     }
 }

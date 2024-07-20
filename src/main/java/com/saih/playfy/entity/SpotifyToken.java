@@ -1,12 +1,12 @@
 package com.saih.playfy.entity;
 
-import com.saih.playfy.service.SpotifyAuthService;
+import lombok.Builder;
 import lombok.Data;
-import lombok.Getter;
 
 import java.util.Date;
 
 @Data
+@Builder
 public class SpotifyToken {
     private final String userId;
     private final String authCode;
@@ -14,11 +14,9 @@ public class SpotifyToken {
     private String refreshToken;
     private Date expiry;
     private long expirySeconds;
-    private SpotifyAuthService spotifyAuthService;
 
-    public SpotifyToken(String userId, String authCode, SpotifyAuthService spotifyAuthService){
-        this.userId = userId;
-        this.authCode = authCode;
-        this.spotifyAuthService = spotifyAuthService;
+    public void setExpiry(long expiry){
+        this.expirySeconds = expiry;
+        this.expiry = new Date(System.currentTimeMillis() + expirySeconds * 1000);
     }
 }

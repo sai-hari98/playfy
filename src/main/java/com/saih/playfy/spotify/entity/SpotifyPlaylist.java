@@ -15,8 +15,15 @@ public class SpotifyPlaylist {
 
     public Playlist toPlaylist() {
         String owner = this.owner.getDisplayName();
-        String thumbnailUrl = images.getFirst().getUrl();
+        String thumbnailUrl = this.getImageUrl();
         String id = this.id;
         return new Playlist(id, StreamingProvider.SPOTIFY, owner, thumbnailUrl, name);
+    }
+
+    public String getImageUrl(){
+        if (this.images == null || this.images.isEmpty())
+            return null;
+        else
+            return this.images.getFirst().getUrl();
     }
 }

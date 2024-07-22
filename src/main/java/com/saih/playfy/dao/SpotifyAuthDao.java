@@ -34,23 +34,7 @@ public class SpotifyAuthDao {
 
     public SpotifyAuthResponse getToken(SpotifyToken spotifyToken, SpotifyGrantType spotifyGrantType) {
         try{
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-
-            MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
-            map.add("grant_type",spotifyProperties.getGrantTypes().get(spotifyGrantType.getGrantType()));
-            if(SpotifyGrantType.ACCESS_TOKEN.equals(spotifyGrantType)) {
-                map.add("code", spotifyToken.getAuthCode());
-                map.add("redirect_uri", spotifyProperties.getRedirectUri());
-                headers.add("Authorization", "Basic "+ getEncodedClientIDAndSecret());
-            }
-            if(SpotifyGrantType.REFRESH_TOKEN.equals(spotifyGrantType)) {
-                map.add("refresh_token", spotifyToken.getRefreshToken());
-                map.add("client_id", spotifyProperties.getClientId());
-            }
-
-            HttpEntity<MultiValueMap<String, String>> entity = new HttpEntity<>(map, headers);
-
+            HttpEntity<MultiValueMap<String, String>> entity = new HttpEntity<>(getFormDataForSpotifyAuth(spotifyToken, spotifyGrantType), getHttpHeadersForSpotifyAuth());
             ResponseEntity<SpotifyAuthResponse> authResponseEntity = spotifyAuthRestTemplate.exchange("/api/token", HttpMethod.POST, entity, SpotifyAuthResponse.class);
             return authResponseEntity.getBody();
         }catch(HttpClientErrorException httpClientErrorException){
@@ -61,6 +45,26 @@ public class SpotifyAuthDao {
             }
             throw httpClientErrorException;
         }
+    }
+
+    private MultiValueMap<String, String> getFormDataForSpotifyAuth(SpotifyToken spotifyToken, SpotifyGrantType spotifyGrantType) {
+        MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
+        map.add("grant_type",spotifyProperties.getGrantTypes().get(spotifyGrantType.getGrantType()));
+        if(SpotifyGrantType.ACCESS_TOKEN.equals(spotifyGrantType)) {
+            map.add("code", spotifyToken.getAuthCode());
+            map.add("redirect_uri", spotifyProperties.getRedirectUri());
+        }
+        if(SpotifyGrantType.REFRESH_TOKEN.equals(spotifyGrantType)) {
+            map.add("refresh_token", spotifyToken.getRefreshToken());
+        }
+        return map;
+    }
+
+    private HttpHeaders getHttpHeadersForSpotifyAuth() {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+        headers.add("Authorization", "Basic "+ getEncodedClientIDAndSecret());
+        return headers;
     }
 
     public SpotifyToken getTokenFromCache(String key){

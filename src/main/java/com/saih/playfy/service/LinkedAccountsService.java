@@ -50,11 +50,6 @@ public class LinkedAccountsService {
         return null;
     }
 
-    public String updateAuthCode(LinkedAccount linkedAccount){
-        linkedAccountsRepository.deleteByUserIdAndProvider(linkedAccount.getUserId(), linkedAccount.getProvider());
-        return linkAccount(linkedAccount);
-    }
-
     public List<LinkedAccount> getAllLinkedAccountsForUser(String userId){
         return linkedAccountsRepository.findByUserId(userId);
     }

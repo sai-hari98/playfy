@@ -3,11 +3,12 @@ package com.saih.playfy.entity;
 import lombok.Builder;
 import lombok.Data;
 
+import java.io.Serializable;
 import java.util.Date;
 
 @Data
 @Builder
-public class SpotifyToken {
+public class SpotifyToken implements Serializable {
     private final String userId;
     private final String authCode;
     private String accessToken;

@@ -33,7 +33,6 @@ public class SpotifyAuthService {
     public SpotifyToken refreshToken(SpotifyToken spotifyToken){
         SpotifyAuthResponse spotifyAuthResponse = spotifyAuthDao.getToken(spotifyToken, SpotifyGrantType.REFRESH_TOKEN);
         spotifyToken.setAccessToken(spotifyAuthResponse.getToken());
-        spotifyToken.setRefreshToken(spotifyAuthResponse.getRefreshToken());
         spotifyToken.setExpiry(spotifyAuthResponse.getExpiry());
         return spotifyToken;
     }
@@ -45,9 +44,6 @@ public class SpotifyAuthService {
             token = initToken();
         } else if(now.after(token.getExpiry())){
             refreshToken(token);
-            LinkedAccount linkedAccount = linkedAccountsDao.getUserLinkedAccountByProvider(StreamingProvider.SPOTIFY);
-            linkedAccount.setRefreshToken(token.getRefreshToken());
-            linkedAccountsDao.saveLinkedAccount(linkedAccount);
         }
         return token;
     }
@@ -58,10 +54,7 @@ public class SpotifyAuthService {
                 .userId(linkedAccount.getUserId())
                 .refreshToken(linkedAccount.getRefreshToken())
                 .build();
-        SpotifyToken updatedToken = refreshToken(spotifyToken);
-        linkedAccount.setRefreshToken(updatedToken.getRefreshToken());
-        linkedAccountsDao.updateRefreshToken(linkedAccount);
-        return spotifyToken;
+        return refreshToken(spotifyToken);
     }
 
     public SpotifyToken initToken(LinkedAccount linkedAccount){

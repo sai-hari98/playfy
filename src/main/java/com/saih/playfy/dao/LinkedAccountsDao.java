@@ -38,9 +38,4 @@ public class LinkedAccountsDao {
     public void saveLinkedAccount(LinkedAccount linkedAccount) {
         linkedAccountsRepository.save(linkedAccount);
     }
-
-    public void updateRefreshToken(LinkedAccount linkedAccount){
-        linkedAccountsRepository.deleteByUserIdAndProvider(linkedAccount.getUserId(), linkedAccount.getProvider());
-        linkedAccountsRepository.save(linkedAccount);
-    }
 }
